@@ -40,6 +40,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+    // Attendance
+    Route::apiResource('attendances', AttendenceController::class);
+    Route::post('/attendances/check-in', [AttendenceController::class, 'checkIn']);
+Route::post('/attendances/check-out', [AttendenceController::class, 'checkOut']);
+
+
     // Payroll
     Route::prefix('payroll')->group(function () {
         Route::get('/show', [PayrollController::class, 'show']);

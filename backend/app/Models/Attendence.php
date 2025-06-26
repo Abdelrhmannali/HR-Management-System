@@ -15,4 +15,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendence extends Model
 {
+    use HasFactory, SoftDeletes;
+    protected $table = 'attendances';
+    
+
+    protected $fillable = [
+        'employee_id', 'date', 'checkInTime', 'checkOutTime',
+        'lateDurationInHours', 'overtimeDurationInHours', 'status'
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+    ];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
 }
