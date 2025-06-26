@@ -1,0 +1,23 @@
+/* إخفاء input الأصلي */
+.file-input {
+    display: none;
+}
+
+/* تصميم الزر المخصص */
+.custom-file-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #ac70c6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.custom-file-button:hover {
+    background-color: #9a5db3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(172, 112, 198, 0.4);
+}
