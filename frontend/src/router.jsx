@@ -20,11 +20,23 @@ import ForgotPassword from "./pages/Login/ForgotPassword";
 
 export default function RouterComponent() {
   return (
-    <Routes>
+
+        <Routes>
+
     
+      <Route element={<Sidebar />}>
+     
+       
+      </Route>
+
+
 
       
       {/* Fallback route */}
     </Routes>
+    
+
+      
+ 
   );
 }
