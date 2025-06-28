@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   FaCalendarAlt,
   FaHome,
@@ -19,13 +19,27 @@ import "./Sidebar.css";
 export default function Sidebar() {
   const [hr, setHr] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   const linkStyle = ({ isActive }) =>
     isActive ? "hrsb-nav-link active" : "hrsb-nav-link";
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/hr/logout");
+      localStorage.removeItem("token");
+
+      // Prevent navigating back after logout
+      window.history.pushState(null, "", window.location.href);
+      window.onpopstate = function () {
+        window.history.go(1);
+      };
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   const toggleSidebar = () => {
@@ -48,8 +62,9 @@ export default function Sidebar() {
             {isSidebarOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
+
         <div className="hrsb-menu">
-          <NavLink to="/Dashboard" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
+          <NavLink to="/dashboard" className={linkStyle} onClick={() => setIsSidebarOpen(false)}>
             <FaHome />
             Home
           </NavLink>
@@ -81,11 +96,15 @@ export default function Sidebar() {
             <FaUserPlus />
             Add HR
           </NavLink>
+
+          {/* Logout button */}
           <button className="hrsb-nav-link" onClick={handleLogout}>
             <FaSignOutAlt />
             Logout
           </button>
         </div>
+
+        {/* HR profile info */}
         {hr && (
           <NavLink
             to="/updateHr"
@@ -105,9 +124,13 @@ export default function Sidebar() {
           </NavLink>
         )}
       </aside>
+
+      {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div className="hrsb-overlay" onClick={toggleSidebar}></div>
       )}
+
+      {/* Main content */}
       <main className="hrsb-main-content">
         <button className="hrsb-mobile-toggle" onClick={toggleSidebar}>
           <FaBars />
