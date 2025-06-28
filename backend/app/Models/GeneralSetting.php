@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GeneralSetting extends Model
 {
-     use HasFactory;
-
+ 
     protected $fillable = [
         'employee_id',
         'deduction_type',
@@ -16,14 +15,13 @@ class GeneralSetting extends Model
         'overtime_value',
         'weekend_days',
     ];
-
     protected $casts = [
-        'weekend_days' => 'array',
-    ];
+    'weekend_days' => 'array',
+];
+
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id');
+        return $this->belongsTo(Employee::class);
     }
-
 }
