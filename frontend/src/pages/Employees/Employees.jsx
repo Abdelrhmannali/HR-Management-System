@@ -258,8 +258,9 @@ export default function Employees() {
       </div>
 
       {/* Table */}
+
       <table
-        className="table table-light ps-5"
+        className="table table-light "
         style={{
           borderRadius: "30px",
           boxShadow: "0 4px 10px rgba(172, 112, 198, 0.1)",
@@ -272,9 +273,24 @@ export default function Employees() {
           }}
         >
           <tr>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>#</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Name</th>
-            <th style={{ color: "#ac70c6", fontWeight: "600" }}>Department</th>
+            <th
+              className="ps-4"
+              style={{ color: "#ac70c6", fontWeight: "600" }}
+            >
+              #
+            </th>
+            <th
+              style={{ color: "#ac70c6", fontWeight: "600" }}
+              className="ps-4 text-centre"
+            >
+              Name
+            </th>
+            <th
+              style={{ color: "#ac70c6", fontWeight: "600" }}
+              className="ps-0"
+            >
+              Department
+            </th>
             <th style={{ color: "#ac70c6", fontWeight: "600" }}>Email</th>
             <th style={{ color: "#ac70c6", fontWeight: "600" }}>Phone</th>
             <th style={{ color: "#ac70c6", fontWeight: "600" }}>Actions</th>
@@ -283,7 +299,7 @@ export default function Employees() {
         <tbody>
           {list?.map((emp, idx) => (
             <tr key={emp.id}>
-              <td>{idx + 1}</td>
+              <td className="ps-4 pe-4">{idx + 1}</td>
               <td>
                 <img
                   src={`http://127.0.0.1:8000/storage/${emp.profile_picture}`}
@@ -295,15 +311,16 @@ export default function Employees() {
                 />
                 {emp.first_name} {emp.last_name}
               </td>
-              <td>{emp.department?.dept_name}</td>
+              <td className=" text-centre">{emp.department?.dept_name}</td>
               <td>{emp.email}</td>
               <td>{emp.phone}</td>
-              <td>
+              <td className="pe-0">
                 <button
                   className="btn btn-sm me-2"
                   onClick={() => handleShow(emp)}
                   style={{
                     backgroundColor: "#ac70c6",
+
                     color: "white",
                     border: "none",
                   }}
@@ -311,10 +328,11 @@ export default function Employees() {
                   <i className="fa-solid fa-eye" />
                 </button>
                 <button
-                  className="btn btn-sm me-2"
+                  className="btn btn-sm me-2 $pink-400 "
                   onClick={() => handleEdit(emp.id)}
                   style={{
                     backgroundColor: "#9b59b6",
+
                     color: "white",
                     border: "none",
                   }}
