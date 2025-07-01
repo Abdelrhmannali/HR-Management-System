@@ -21,13 +21,14 @@ Route::post('/hr/reset-password', [PasswordResetController::class, 'reset']);
 // ==================
 
 Route::post('/hr/login', [HRController::class, 'login']);
-        Route::post('/hr/AddHr', [HRController::class, 'AddHr']);
+    
 
 // ==================
 // Protected routes
 // ==================
 Route::middleware('auth:sanctum')->group(function () {
 
+        Route::post('/hr/AddHr', [HRController::class, 'AddHr']);
    
 
 
@@ -35,14 +36,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+
     Route::post('/hr/logout', [HRController::class, 'logout']);
 
 
 
-
     // Attendance
-    Route::apiResource('attendances', AttendenceController::class);
-    Route::post('/attendances/check-in', [AttendenceController::class, 'checkIn']);
+Route::get('/attendances', [AttendenceController::class, 'index']);
+Route::post('/attendances', [AttendenceController::class, 'store']);
+Route::get('/attendances/{attendance}', [AttendenceController::class, 'show']);
+Route::put('/attendances/{attendance}', [AttendenceController::class, 'update']);
+Route::delete('/attendances/{id}', [AttendenceController::class, 'destroy']);
+
+Route::post('/attendances/check-in', [AttendenceController::class, 'checkIn']);
 Route::post('/attendances/check-out', [AttendenceController::class, 'checkOut']);
 
 
@@ -57,5 +63,6 @@ Route::get('/current-month', [PayrollController::class, 'getCurrentMonth']);
 Route::get('/all-months', [PayrollController::class, 'getAllMonths']);
 
     });
+    Route::get('/payroll/verify/{employee_id}/{month}', [PayrollController::class, 'verifyPayrollApi']);
 
 });
