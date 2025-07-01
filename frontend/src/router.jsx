@@ -25,6 +25,8 @@ export default function RouterComponent() {
 
     
       <Route element={<Sidebar />}>
+           <Route path="/holidays" element={<Holidayes />} />
+        <Route path="/payroll" element={<Payroll />} />
      
        
       </Route>
