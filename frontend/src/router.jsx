@@ -14,6 +14,8 @@ import EditEmployee from './pages/Employees/EditEmployee';
 import AttendancePage from './pages/Attendance/AttendancePage';
 import GeneralSettingForm from './pages/Settings/GeneralSettingForm';
 import ForgotPassword from "./pages/Login/ForgotPassword";
+import DashboardPage from './pages/DashboardPage/DashboardPage';
+
 
   import ResetPassword from './pages/Login/ResetPassword';
 
@@ -21,6 +23,8 @@ import ForgotPassword from "./pages/Login/ForgotPassword";
 export default function RouterComponent() {
   return (
     <Routes>
+        <Route path="/Dashboard" element={<DashboardPage/>} />
+      
     
 
       
