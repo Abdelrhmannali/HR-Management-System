@@ -167,10 +167,16 @@ export default function EditEmployee() {
   /* ---------- submit ---------- */
   function handleSave(values) {
     const fd = new FormData();
+
     for (const [k, v] of Object.entries(values)) {
-      if (k === "profile_picture" && v) fd.append("profile_picture", v);
-      else fd.append(k, v ?? "");
+      if (k === "profile_picture") {
+        // أضف الصورة فقط لو المستخدم اختار ملفًا جديدًا
+        if (v) fd.append("profile_picture", v);
+      } else {
+        fd.append(k, v ?? "");
+      }
     }
+
     fd.append("_method", "PUT");
 
     api
