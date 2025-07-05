@@ -54,13 +54,6 @@ export default function Employees() {
     setShowModel(true);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const q = searchInputRef.current?.value.trim().toLowerCase();
-    if (!q) return;
-    setSearchParams({ page: 1, query: q });
-  };
-
   const handleReset = () => {
     setSearchText("");
     searchInputRef.current && (searchInputRef.current.value = "");
@@ -100,7 +93,7 @@ export default function Employees() {
           </div>
 
           <div className="col-12 col-md-6">
-            <form className="employee-form d-flex" onSubmit={handleSearch}>
+            <form className="employee-form d-flex">
               <input
                 ref={searchInputRef}
                 className="employee-form-input form-control me-2 border-2"
@@ -109,9 +102,7 @@ export default function Employees() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
-              <button className="employee-form-button btn-small" type="submit">
-                Search
-              </button>
+
               <button
                 className="employee-form-button btn-small ms-2"
                 type="button"
@@ -209,70 +200,72 @@ export default function Employees() {
       </div>
 
       {/* -------- Employee Table -------- */}
-      <table
-        className="table table-light ps-5 mt-4"
-        style={{
-          borderRadius: "30px",
-          boxShadow: "0 4px 10px rgba(172,112,198,.1)",
-        }}
-      >
-        <thead
+      <div className="table-responsive">
+        <table
+          className="table table-light ps-5 mt-4  align-middle"
           style={{
-            backgroundColor: "#f8f9fa",
-            borderBottom: "2px solid #6b48a3",
+            borderRadius: "30px",
+            boxShadow: "0 4px 10px rgba(172,112,198,.1)",
           }}
         >
-          <tr>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>#</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Name</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Department</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Email</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Phone</th>
-            <th style={{ color: "#ac70c6", fontWeight: 600 }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list?.map((emp, idx) => (
-            <tr key={emp.id}>
-              <td>{idx + 1}</td>
-              <td>
-                <img
-                  src={`http://127.0.0.1:8000/storage/${emp.profile_picture}`}
-                  alt="avatar"
-                  width="50"
-                  height="50"
-                  className="rounded-circle me-2"
-                  style={{ border: "2px solid #6b48a3" }}
-                />
-                {emp.first_name} {emp.last_name}
-              </td>
-              <td>{emp.department?.dept_name ?? "-"}</td>
-              <td>{emp.email ?? "-"}</td>
-              <td>{emp.phone ?? "-"}</td>
-              <td>
-                <button
-                  className="employee-action-button view me-2"
-                  onClick={() => handleShow(emp)}
-                >
-                  <i className="fa-solid fa-eye" />
-                </button>
-                <button
-                  className="employee-action-button edit me-2"
-                  onClick={() => handleEdit(emp.id)}
-                >
-                  <i className="fa-solid fa-user-pen" />
-                </button>
-                <button
-                  className="employee-action-button delete"
-                  onClick={() => handleDelete(emp.id)}
-                >
-                  <i className="fa-solid fa-trash-can" />
-                </button>
-              </td>
+          <thead
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderBottom: "2px solid #6b48a3",
+            }}
+          >
+            <tr>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>#</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Name</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Department</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Email</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Phone</th>
+              <th style={{ color: "#ac70c6", fontWeight: 600 }}>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {list?.map((emp, idx) => (
+              <tr key={emp.id}>
+                <td>{idx + 1}</td>
+                <td>
+                  <img
+                    src={`http://127.0.0.1:8000/storage/${emp.profile_picture}`}
+                    alt="avatar"
+                    width="50"
+                    height="50"
+                    className="rounded-circle me-2"
+                    style={{ border: "2px solid #6b48a3" }}
+                  />
+                  {emp.first_name} {emp.last_name}
+                </td>
+                <td>{emp.department?.dept_name ?? "-"}</td>
+                <td>{emp.email ?? "-"}</td>
+                <td>{emp.phone ?? "-"}</td>
+                <td>
+                  <button
+                    className="employee-action-button view me-2"
+                    onClick={() => handleShow(emp)}
+                  >
+                    <i className="fa-solid fa-eye" />
+                  </button>
+                  <button
+                    className="employee-action-button edit me-2"
+                    onClick={() => handleEdit(emp.id)}
+                  >
+                    <i className="fa-solid fa-user-pen" />
+                  </button>
+                  <button
+                    className="employee-action-button delete"
+                    onClick={() => handleDelete(emp.id)}
+                  >
+                    <i className="fa-solid fa-trash-can" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* -------- Pagination -------- */}
       <div className="d-flex justify-content-center flex-wrap mt-4">
