@@ -1,0 +1,362 @@
+/* ========= Page Layout ========= */
+.employee-page-wrapper {
+  padding: 30px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+/* ========= Header ========= */
+.employee-header {
+  margin-bottom: 30px;
+}
+
+.employee-header-title {
+  display: flex;
+  align-items: center;
+}
+
+.employee-header-icon {
+  font-size: 30px;
+  color: #6b48a3;
+  margin-right: 10px;
+}
+
+.employee-header h2 {
+  font-size: 28px;
+  color: #6b48a3;
+  font-weight: bold;
+}
+
+/* ========= Form Container ========= */
+.employee-form-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(172, 112, 198, 0.1);
+}
+
+/* ========= Form Inputs ========= */
+.employee-form-container .form-control,
+.employee-form input {
+  border: 2px solid #ddd !important; /* Light gray border */
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.875rem;
+  transition: border-color 0.3s ease;
+}
+
+.employee-form-container .form-control:hover,
+.employee-form input:hover {
+  border-color: #ac70c6 !important; /* Mauve on hover */
+}
+
+.employee-form-container .form-control:focus,
+.employee-form input:focus {
+  border-color: #ac70c6 !important; 
+  box-shadow: none; 
+}
+
+.employee-form-container .form-label {
+  font-weight: 500;
+  color: #333; 
+  margin-bottom: 5px;
+ 
+  padding: 5px 10px; 
+  border-radius: 4px; 
+}
+
+.employee-form-container .invalid-feedback {
+  font-size: 0.75rem;
+  color: #e74c3c;
+}
+
+/* ========= Fieldset Styling ========= */
+.employee-form-container fieldset {
+  border: 2px solid #ac70c6;
+  border-radius: 12px !important;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.employee-form-container legend {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #6b48a3;
+  background-color: #fff;
+  padding: 0 10px;
+}
+
+/* ========= Buttons ========= */
+.employee-form-button {
+  background-color: #fff;
+  border: 2px solid #ac70c6;
+  color: #ac70c6;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+.employee-form-button-addEdit{
+  background-color: #9b59b6 ;
+  border: 2px solid #9b59b6 ;
+  color: white;
+   font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.employee-form-button-addEdit:hover,
+.employee-form-button:hover {
+  background-color: #ac70c6;
+  color: white;
+  
+}
+
+.employee-form-button-addEdit:disabled,
+.employee-form-button:disabled {
+  background-color: #ac70c6;
+  border-color: #ac70c6;
+  color: #fff;
+  cursor: not-allowed;
+}
+.employee-form-button-addEdit.no-border,
+.employee-form-button.no-border {
+  border: none !important;
+}
+
+/* ========= Custom File Input ========= */
+.employee-form-container .file-input {
+  display: none;
+}
+
+.employee-form-container .custom-file-button {
+  display: inline-block;
+  background-color: #ac70c6;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.3s ease;
+}
+
+.employee-form-container .custom-file-button:hover {
+  background-color: #9b59b6;
+}
+
+/* ========= Action Buttons ========= */
+.employee-action-button {
+  border: none;
+  padding: 5px 10px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.85rem;
+  transition: background-color 0.3s ease;
+}
+
+.employee-action-button.view {
+  background-color: #b983d0;
+}
+
+.employee-action-button.view:hover {
+  background-color: #a168c0;
+}
+
+.employee-action-button.edit {
+  background-color: #8e44ad;
+}
+
+.employee-action-button.edit:hover {
+  background-color: #732d91;
+}
+
+.employee-action-button.delete {
+  background-color: #e74c3c;
+}
+
+.employee-action-button.delete:hover {
+  background-color: #c0392b;
+}
+
+/* ========= Stat Cards ========= */
+.employee-cards-container {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 768px) {
+  .employee-cards-container {
+    flex-wrap: nowrap;
+  }
+}
+
+.employee-stat-card {
+  flex: 1 1 0;
+  min-width: 18rem;
+  border: 1px solid #ddd;
+  border-radius: 20px !important; 
+  box-shadow: 0 4px 10px rgba(172, 112, 198, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.employee-stat-card:hover {
+  transform: scale(1.02);
+}
+
+/* ========= Table Styling ========= */
+.table {
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(172, 112, 198, 0.1);
+  background-color: #fff;
+}
+
+.table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #6b48a3;
+}
+
+.table th {
+  color: #ac70c6;
+  font-weight: 600;
+}
+
+.table td img {
+  border: 2px solid #6b48a3;
+}
+
+/* ========= Pagination ========= */
+
+
+.pagination-active {
+  background-color: #ac70c6 !important;
+  color: white !important;
+}
+
+/* ========= Search Form ========= */
+.employee-form {
+  justify-content: end;
+  align-items: center;
+}
+
+.employee-form input,
+.employee-form button {
+  font-size: 0.875rem;
+  padding: 6px 10px;
+}
+
+.employee-form input {
+  border: 2px solid #6b48a3 !important;
+  border-radius: 8px;
+}
+
+.employee-form input:focus,
+.employee-form input:hover {
+  border-color: #ac70c6 !important;
+  box-shadow: none; 
+}
+
+
+
+/* ========= Responsive Adjustments ========= */
+@media (max-width: 576px) {
+  .employee-form-container {
+    padding: 15px;
+  }
+
+  .employee-form-button {
+    width: 100%;
+  }
+
+
+
+.employee-form-container .custom-file-button {
+  display: inline-block;       
+  cursor: pointer;             
+  max-width: 240px;          
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+}
+/* ---------------------- */
+
+@media (max-width: 576px) {
+  .employee-action-button.view::after,
+  .employee-action-button.edit::after,
+  .employee-action-button.delete::after {
+    content: "";        /* اخفِ النص */
+  }
+  .employee-action-button {
+    padding: 6px 8px; 
+      /* أصغر قليلاً */
+  }
+}
+@media (max-width: 768px) {
+  .employee-stat-card {
+    flex: 1 1 100%;           /* صف كامل */
+    min-width: auto;
+  }
+}
+
+
+@media (max-width: 576px) {
+  .employee-form-container .react-select__control {
+    width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .employee-form-container .react-select__control {
+    width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .table td img {
+    width: 35px;
+    height: 35px;
+  }
+}
+@media (max-width: 576px) {
+  .employee-form-button {
+    padding: 4px 10px;
+    margin: 2px 4px;
+    font-size: .8rem;
+  }
+}
+
+
+@media (max-width: 576px) {
+  .employee-action-button {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 6px 8px;
+    font-size: 1rem;
+  }
+
+  .employee-action-button.view {
+    color: #b983d0 !important;
+  }
+
+  .employee-action-button.edit {
+    color: #8e44ad !important;
+  }
+
+  .employee-action-button.delete {
+    color: #e74c3c !important;
+  }
+
+  .employee-action-button.view:hover,
+  .employee-action-button.edit:hover,
+  .employee-action-button.delete:hover {
+    background-color: transparent !important;
+    opacity: 0.8;
+  }
+}
+
+
+
