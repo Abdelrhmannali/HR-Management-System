@@ -41,7 +41,7 @@ export default function SettingsPage() {
       const { data } = await api.get("/settings");
       const settingsData = Array.isArray(data.data) ? data.data : data.data ? [data.data] : [];
       setSettings(settingsData);
-      toast.success("Settings loaded!", { position: "top-right", autoClose: 1000 });
+      
     } catch (error) {
       console.error("Error fetching settings:", error.response?.data || error.message);
       toast.error("Failed to load settings!", { position: "top-right", autoClose: 1000 });
@@ -258,6 +258,7 @@ const handleCheckboxChange = (day) => {
         </div>
         <div className="set-stat-card set-chart-card">
           <h3>Weekend Days Distribution</h3>
+          
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weekendDaysData}>
               <CartesianGrid strokeDasharray="3 3" />
