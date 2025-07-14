@@ -121,7 +121,7 @@ export default function AttendancePage() {
       const response = await api.get("/employees");
       const employeeData = Array.isArray(response.data.data) ? response.data.data : response.data;
       setEmployees(employeeData);
-    } catch {
+    } catch (error) {
       toast.error("Failed to fetch employees", {
         position: "top-right",
         autoClose: 1000,
@@ -375,7 +375,7 @@ export default function AttendancePage() {
       absenceMap[key] = (absenceMap[key] || 0) + 1;
     }
   });
-  // const absenceData = Object.entries(absenceMap).map(([name, count]) => ({ name, absences: count }));
+  const absenceData = Object.entries(absenceMap).map(([name, count]) => ({ name, absences: count }));
   const pieData = [
     { name: "Present", value: presentCount },
     { name: "Absent", value: absentCount },
@@ -431,7 +431,7 @@ export default function AttendancePage() {
             toastId: "absentees-marked",
           });
           await fetchAttendances();
-        } catch {
+        } catch (error) {
           toast.error("فشل في تحديث الغياب", {
             position: "top-right",
             autoClose: 1000,

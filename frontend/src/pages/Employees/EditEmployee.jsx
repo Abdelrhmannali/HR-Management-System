@@ -1,15 +1,14 @@
+// src/pages/Employees/EditEmployee.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Select from "react-select"; // ← NEW
 import api from "../../api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Employee.css";
 
-/* ---------------- reusable input ---------------- */
 const Input = ({ label, name, type, formik }) => (
   <div className="col-md-6 mb-3">
     <label className="form-label">{label}</label>
@@ -17,7 +16,7 @@ const Input = ({ label, name, type, formik }) => (
       type={type}
       name={name}
       className={
-        "form-control" +
+        "form-control employee-form-container" +
         (formik.touched[name] && formik.errors[name] ? " is-invalid" : "")
       }
       value={formik.values[name]}
@@ -30,85 +29,29 @@ const Input = ({ label, name, type, formik }) => (
   </div>
 );
 
-/* --------------- shared react‑select styles --------------- */
-const getSelectStyles = (hasError) => ({
-  control: (base) => ({
-    ...base,
-    backgroundColor: "#fff",
-    borderColor: hasError ? "#e74c3c" : "#ddd",
-    borderWidth: "2px",
-    borderRadius: "8px",
-    padding: "2px 6px",
-    fontSize: "0.875rem",
-    minHeight: "38px",
-    boxShadow: "none",
-    "&:hover": {
-      borderColor: hasError ? "#e74c3c" : "#ac70c6",
-    },
-  }),
-  singleValue: (base) => ({
-    ...base,
-    color: "#333", // نفس لون النص في الانبتس
-  }),
-  input: (base) => ({
-    ...base,
-    color: "#333",
-  }),
-  placeholder: (base) => ({
-    ...base,
-    color: "#aaa",
-  }),
-  option: (base, { isFocused, isSelected }) => ({
-    ...base,
-    backgroundColor: isSelected
-      ? "#d8b4f8" // موف فاتح عند التحديد
-      : isFocused
-      ? "#f9edfc" // خلفية أفتح عند hover
-      : "#fff",
-    color: "#6b48a3", // لون نص موف جميل
-    fontSize: "0.875rem",
-    padding: "10px 12px",
-    cursor: "pointer",
-  }),
-  menu: (base) => ({
-    ...base,
-    borderRadius: "8px",
-    boxShadow: "0 4px 10px rgba(172, 112, 198, 0.1)",
-  }),
-});
-
-/* ---------------------------------------------------------- */
 export default function EditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [fileName, setFileName] = useState("No chosen file");
 
-  /* ---------- fetch employee + departments ---------- */
   const { data: emp, isError: empError } = useQuery({
     queryKey: ["employee", id],
     queryFn: () => api.get(`/employees/${id}`).then((r) => r.data),
   });
+
   const { data: departmentsData, isError: depError } = useQuery({
     queryKey: ["departments"],
     queryFn: () => api.get("/departments").then((r) => r.data),
   });
-  const departments = Array.isArray(departmentsData)
-    ? departmentsData
-    : departmentsData?.data ?? [];
-  const departmentOptions = departments.map((d) => ({
-    value: d.id,
-    label: d.dept_name,
-  }));
 
   useEffect(() => {
     if (emp?.profile_picture) {
-      const original = emp.profile_picture.split("/").pop();
-      setFileName(original || "Current file");
+      const originalFileName = emp.profile_picture.split("/").pop();
+      setFileName(originalFileName || "Current file");
     }
   }, [emp]);
 
-  /* ---------- validation ---------- */
   const schema = yup.object({
     first_name: yup
       .string()
@@ -139,7 +82,6 @@ export default function EditEmployee() {
     department_id: yup.number().required(),
   });
 
-  /* ---------- formik ---------- */
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -164,19 +106,15 @@ export default function EditEmployee() {
     onSubmit: handleSave,
   });
 
-  /* ---------- submit ---------- */
   function handleSave(values) {
     const fd = new FormData();
-
     for (const [k, v] of Object.entries(values)) {
       if (k === "profile_picture") {
-        // أضف الصورة فقط لو المستخدم اختار ملفًا جديدًا
         if (v) fd.append("profile_picture", v);
       } else {
         fd.append(k, v ?? "");
       }
     }
-
     fd.append("_method", "PUT");
 
     api
@@ -190,24 +128,23 @@ export default function EditEmployee() {
       .catch((err) => {
         if (err.response?.status === 422) {
           formik.setErrors(err.response.data.errors || {});
-          toast.error("Fix validation errors");
-        } else toast.error("Update failed");
+          toast.error("Please fix validation errors.");
+        } else {
+          toast.error("Failed to update employee");
+        }
       });
   }
 
   if (empError || depError)
     return <div className="alert alert-danger">Failed to load data</div>;
 
-  const genderOptions = [
-    { value: "Male", label: "Male" },
-    { value: "Female", label: "Female" },
-  ];
+  const departments = Array.isArray(departmentsData)
+    ? departmentsData
+    : departmentsData?.data ?? [];
 
-  /* ---------- UI ---------- */
   return (
     <div className="employee-page-wrapper">
       <ToastContainer position="bottom-end" autoClose={3000} />
-      {/* header */}
       <div className="employee-header">
         <div className="employee-header-title ms-5">
           <span className="employee-header-icon">
@@ -217,14 +154,12 @@ export default function EditEmployee() {
         </div>
       </div>
 
-      {/* form */}
       <div className="employee-form-container">
         <form
           noValidate
           onSubmit={formik.handleSubmit}
           encType="multipart/form-data"
         >
-          {/* --- Personal Info --- */}
           <fieldset className="border p-3 mb-4 rounded">
             <legend className="float-none w-auto px-3">
               Personal Information
@@ -262,30 +197,28 @@ export default function EditEmployee() {
                 type="date"
                 formik={formik}
               />
-
-              {/* Gender select */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Gender</label>
-                <Select
+                <select
                   name="gender"
-                  options={genderOptions}
-                  value={genderOptions.find(
-                    (o) => o.value === formik.values.gender
-                  )}
-                  onChange={(o) => formik.setFieldValue("gender", o.value)}
-                  onBlur={() => formik.setFieldTouched("gender", true)}
-                  styles={getSelectStyles(
-                    formik.touched.gender && formik.errors.gender
-                  )}
-                  placeholder="Select Gender"
-                />
+                  className={
+                    "form-select employee-form-container" +
+                    (formik.touched.gender && formik.errors.gender
+                      ? " is-invalid"
+                      : "")
+                  }
+                  value={formik.values.gender}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
                 {formik.touched.gender && formik.errors.gender && (
-                  <div className="invalid-feedback d-block">
-                    {formik.errors.gender}
-                  </div>
+                  <div className="invalid-feedback">{formik.errors.gender}</div>
                 )}
               </div>
-
               <Input
                 label="Address"
                 name="address"
@@ -295,7 +228,6 @@ export default function EditEmployee() {
             </div>
           </fieldset>
 
-          {/* --- Job Settings --- */}
           <fieldset className="border p-3 mb-4 rounded">
             <legend className="float-none w-auto px-3">Job Settings</legend>
             <div className="row g-3">
@@ -329,39 +261,46 @@ export default function EditEmployee() {
                 type="time"
                 formik={formik}
               />
-
-              {/* Department select */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Department</label>
-                <Select
+                <select
                   name="department_id"
-                  options={departmentOptions}
-                  value={departmentOptions.find(
-                    (o) => o.value === formik.values.department_id
-                  )}
-                  onChange={(o) =>
-                    formik.setFieldValue("department_id", o.value)
+                  className={
+                    "form-select employee-form-container" +
+                    (formik.touched.department_id && formik.errors.department_id
+                      ? " is-invalid"
+                      : "")
                   }
-                  onBlur={() => formik.setFieldTouched("department_id", true)}
-                  styles={getSelectStyles(
-                    formik.touched.department_id && formik.errors.department_id
-                  )}
-                  placeholder="Select Department"
-                />
+                  value={formik.values.department_id}
+                  onChange={(e) =>
+                    formik.setFieldValue(
+                      "department_id",
+                      Number(e.target.value)
+                    )
+                  }
+                  onBlur={formik.handleBlur}
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.dept_name}
+                    </option>
+                  ))}
+                </select>
                 {formik.touched.department_id &&
                   formik.errors.department_id && (
-                    <div className="invalid-feedback d-block">
+                    <div className="invalid-feedback">
                       {formik.errors.department_id}
                     </div>
                   )}
               </div>
 
-              {/* File upload */}
+              {/* File Upload */}
               <div className="col-md-6 mb-3">
                 <label className="form-label">Profile Picture</label>
                 <input
                   type="file"
-                  id="profile_picture"
+                  id="profile_picture" // ← مهم
                   name="profile_picture"
                   className="file-input"
                   accept="image/*"
@@ -378,11 +317,10 @@ export default function EditEmployee() {
             </div>
           </fieldset>
 
-          {/* submit */}
           <div className="d-grid">
             <button
               type="submit"
-              className="employee-form-button-addEdit"
+              className="employee-form-button"
               disabled={!formik.isValid || !formik.dirty || formik.isSubmitting}
             >
               {formik.isSubmitting ? (

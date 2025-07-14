@@ -12,6 +12,201 @@ use App\Models\Department;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
+class ResponseFormatter
+{
+    public static function formatEmployeeCount($count)
+    {
+        return "<div class='result-card'>" .
+               "<h3>إجمالي عدد الموظفين</h3>" .
+               "<div class='main-number'>{$count}</div>" .
+               "<p class='sub-text'>موظف مسجل في النظام</p>" .
+               "</div>";
+    }
+
+    public static function formatEmployeeList($employees)
+    {
+        if (empty($employees)) {
+            return "<div class='info-message'>لا توجد بيانات موظفين متاحة حالياً</div>";
+        }
+
+        $response = "<div class='results-container'>";
+        $response .= "<div class='results-header'>";
+        $response .= "<h3>قائمة الموظفين</h3>";
+        $response .= "<span class='count-badge'>" . count($employees) . " موظف</span>";
+        $response .= "</div>";
+        
+        foreach ($employees as $index => $employee) {
+            $response .= "<div class='employee-card'>";
+            $response .= "<div class='employee-header'>";
+            $response .= "<span class='employee-name'>" . $employee->first_name . " " . $employee->last_name . "</span>";
+            $response .= "<span class='employee-number'>#" . str_pad($employee->id, 3, '0', STR_PAD_LEFT) . "</span>";
+            $response .= "</div>";
+            $response .= "<div class='employee-details'>";
+            $response .= "<div class='detail-item'>";
+            $response .= "<span class='label'>القسم</span>";
+            $response .= "<span class='value'>" . ($employee->department->dept_name ?? 'غير محدد') . "</span>";
+            $response .= "</div>";
+            $response .= "<div class='detail-item'>";
+            $response .= "<span class='label'>الراتب</span>";
+            $response .= "<span class='value salary'>" . number_format($employee->salary ?? 0) . " جنيه</span>";
+            $response .= "</div>";
+            $response .= "</div>";
+            $response .= "</div>";
+        }
+        
+        $response .= "</div>";
+        return $response;
+    }
+
+    public static function formatAttendanceToday($attendanceData)
+    {
+        $response = "<div class='attendance-summary'>";
+        $response .= "<h3>تقرير الحضور اليوم</h3>";
+        
+        if (isset($attendanceData['total'])) {
+            $response .= "<div class='stats-grid'>";
+            
+            $response .= "<div class='stat-item present'>";
+            $response .= "<div class='stat-number'>" . ($attendanceData['present'] ?? 0) . "</div>";
+            $response .= "<div class='stat-label'>حاضر</div>";
+            $response .= "</div>";
+            
+            $response .= "<div class='stat-item late'>";
+            $response .= "<div class='stat-number'>" . ($attendanceData['late'] ?? 0) . "</div>";
+            $response .= "<div class='stat-label'>متأخر</div>";
+            $response .= "</div>";
+            
+            $response .= "<div class='stat-item absent'>";
+            $response .= "<div class='stat-number'>" . ($attendanceData['absent'] ?? 0) . "</div>";
+            $response .= "<div class='stat-label'>غائب</div>";
+            $response .= "</div>";
+            
+            $response .= "</div>";
+            
+            // إضافة نسبة الحضور
+            $total = ($attendanceData['present'] ?? 0) + ($attendanceData['late'] ?? 0) + ($attendanceData['absent'] ?? 0);
+            if ($total > 0) {
+                $attendanceRate = round((($attendanceData['present'] ?? 0) / $total) * 100, 1);
+                $response .= "<div class='attendance-rate'>";
+                $response .= "<span class='rate-label'>معدل الحضور</span>";
+                $response .= "<span class='rate-value'>{$attendanceRate}%</span>";
+                $response .= "</div>";
+            }
+        }
+        
+        $response .= "</div>";
+        return $response;
+    }
+
+    public static function formatSalaryInfo($salaries)
+    {
+        if (empty($salaries)) {
+            return "<div class='info-message'>لا توجد بيانات رواتب متاحة</div>";
+        }
+
+        $total = array_sum(array_column($salaries, 'salary'));
+        $average = $total / count($salaries);
+        $highest = max(array_column($salaries, 'salary'));
+        $lowest = min(array_column($salaries, 'salary'));
+
+        $response = "<div class='salary-analysis'>";
+        $response .= "<h3>تحليل الرواتب</h3>";
+        
+        $response .= "<div class='analysis-grid'>";
+        
+        $response .= "<div class='analysis-item total'>";
+        $response .= "<div class='analysis-number'>" . number_format($total) . "</div>";
+        $response .= "<div class='analysis-label'>إجمالي الرواتب</div>";
+        $response .= "<div class='analysis-unit'>جنيه</div>";
+        $response .= "</div>";
+        
+        $response .= "<div class='analysis-item average'>";
+        $response .= "<div class='analysis-number'>" . number_format($average) . "</div>";
+        $response .= "<div class='analysis-label'>متوسط الراتب</div>";
+        $response .= "<div class='analysis-unit'>جنيه</div>";
+        $response .= "</div>";
+        
+        $response .= "<div class='analysis-item highest'>";
+        $response .= "<div class='analysis-number'>" . number_format($highest) . "</div>";
+        $response .= "<div class='analysis-label'>أعلى راتب</div>";
+        $response .= "<div class='analysis-unit'>جنيه</div>";
+        $response .= "</div>";
+        
+        $response .= "<div class='analysis-item lowest'>";
+        $response .= "<div class='analysis-number'>" . number_format($lowest) . "</div>";
+        $response .= "<div class='analysis-label'>أقل راتب</div>";
+        $response .= "<div class='analysis-unit'>جنيه</div>";
+        $response .= "</div>";
+        
+        $response .= "</div>";
+        $response .= "</div>";
+        
+        return $response;
+    }
+
+    public static function formatDepartmentStats($departments)
+    {
+        if (empty($departments)) {
+            return "<div class='info-message'>لا توجد أقسام متاحة</div>";
+        }
+
+        $response = "<div class='departments-overview'>";
+        $response .= "<h3>نظرة عامة على الأقسام</h3>";
+        
+        $totalEmployees = array_sum(array_column($departments, 'employee_count'));
+        
+        foreach ($departments as $dept) {
+            $percentage = $totalEmployees > 0 ? round(($dept['employee_count'] / $totalEmployees) * 100, 1) : 0;
+            
+            $response .= "<div class='department-item'>";
+            $response .= "<div class='department-header'>";
+            $response .= "<span class='department-name'>" . $dept['name'] . "</span>";
+            $response .= "<span class='department-count'>" . $dept['employee_count'] . " موظف</span>";
+            $response .= "</div>";
+            $response .= "<div class='department-bar'>";
+            $response .= "<div class='bar-fill' style='width: {$percentage}%'></div>";
+            $response .= "</div>";
+            $response .= "<div class='department-percentage'>{$percentage}% من إجمالي الموظفين</div>";
+            $response .= "</div>";
+        }
+        
+        $response .= "</div>";
+        return $response;
+    }
+
+    public static function formatGeneralResponse($message)
+    {
+        // تنظيف شامل من أي رموز أو أيقونات
+        $message = preg_replace('/[📊📋👤💰⭐✅❌🔍💡👥📈📉🏢⏰➕🏛️💼💵🌍🆔🎂📱📧🏠📅🕐🕕🎯📝📞⚠️🚀🔧]/u', '', $message);
+        
+        // إزالة أي رموز unicode للأيقونات
+        $message = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $message);
+        $message = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $message);
+        
+        // إزالة النجوم وعلامات التنسيق
+        $message = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $message);
+        $message = str_replace(['**', '*', '⭐', '✅', '❌', '📊'], '', $message);
+        
+        // إزالة عبارات معينة
+        $message = preg_replace('/النتائج:\s*/u', '', $message);
+        $message = preg_replace('/تحليل سريع:\s*/u', '', $message);
+        $message = preg_replace('/النتيجة:\s*/u', '', $message);
+        
+        // تنظيف المسافات
+        $message = trim(preg_replace('/\s+/', ' ', $message));
+        
+        // إذا كان النص فارغ بعد التنظيف، أضف رد افتراضي
+        if (empty(trim($message))) {
+            $message = "تم معالجة طلبك بنجاح";
+        }
+        
+        // تحسين التنسيق
+        $message = "<div class='general-response'>" . $message . "</div>";
+        
+        return $message;
+    }
+}
+
 class HRChatService
 {
     protected $client;
@@ -129,7 +324,9 @@ class HRChatService
                 return $finalResponse;
             }
 
-            return $aiResponse;
+            // تنظيف نهائي للاستجابة حتى لو لم تحتوي على SQL
+            $cleanAiResponse = $this->finalCleanup($aiResponse);
+            return ResponseFormatter::formatGeneralResponse($cleanAiResponse);
             
         } catch (RequestException $e) {
             $errorMsg = 'Network Error: ' . $e->getMessage();
@@ -147,7 +344,7 @@ class HRChatService
                 'details' => $errorDetails
             ]);
             
-            return "عذراً، حدث خطأ في الاتصال بخدمة الذكاء الاصطناعي. يرجى المحاولة مرة أخرى خلال دقائق.";
+            return "<div class='info-message'>عذراً، حدث خطأ في الاتصال بخدمة الذكاء الاصطناعي. يرجى المحاولة مرة أخرى خلال دقائق.</div>";
             
         } catch (\Exception $e) {
             Log::error('HR Chat General Error', [
@@ -170,26 +367,29 @@ class HRChatService
             
             return "أنت مساعد ذكي متخصص في نظام إدارة الموارد البشرية. تتحدث باللغة العربية وتجيب بدقة عالية.
 
-📊 **هيكل قاعدة البيانات (الحقول الموجودة فعلياً):**
+هيكل قاعدة البيانات (الحقول الموجودة فعلياً):
 {$hrSchema}
 
-📋 **السياق التجاري:**
+السياق التجاري:
 {$businessContext}
 
-⚠️ **قواعد مهمة جداً:**
+قواعد مهمة جداً - يجب اتباعها بدقة:
 - لا تُظهر للمستخدم أي SQL code مطلقاً
+- لا تستخدم أي أيقونات أو رموز تعبيرية أو نجوم في ردودك (ممنوع: 📊 📋 👤 💰 ⭐ ✅ ❌ 🔍 💡 👥 📈 📉 🏢 ⏰ ➕ ** *)
+- لا تستخدم ** للتأكيد أو التنسيق
+- اكتب بأسلوب طبيعي وبسيط بدون أي رموز
 - استخدم فقط الحقول الموجودة فعلياً في قاعدة البيانات
-- لا تخترع أسماء حقول غير موجودة (مثل position, job_title, department_name)
+- لا تخترع أسماء حقول غير موجودة
 - عند الحاجة لاستعلام، ضع SQL داخل <SQL></SQL> فقط
 - استخدم SELECT فقط - لا UPDATE/DELETE/INSERT
 
-🔍 **الحقول المتاحة بالضبط:**
-- **employees:** id, first_name, last_name, email, phone, address, salary, hire_date, department_id, working_hours_per_day, salary_per_hour, gender, nationality, national_id, birthdate, default_check_in_time, default_check_out_time
-- **departments:** id, dept_name
-- **attendances:** id, employee_id, date, checkInTime, checkOutTime, lateDurationInHours, overtimeDurationInHours, status
-- **payrolls:** id, employee_id, month, month_days, attended_days, absent_days, total_overtime, total_deduction, net_salary, salary_per_hour
+الحقول المتاحة بالضبط:
+- employees: id, first_name, last_name, email, phone, address, salary, hire_date, department_id, working_hours_per_day, salary_per_hour, gender, nationality, national_id, birthdate, default_check_in_time, default_check_out_time
+- departments: id, dept_name
+- attendances: id, employee_id, date, checkInTime, checkOutTime, lateDurationInHours, overtimeDurationInHours, status
+- payrolls: id, employee_id, month, month_days, attended_days, absent_days, total_overtime, total_deduction, net_salary, salary_per_hour
 
-💡 **أمثلة على استعلامات صحيحة:**
+أمثلة على استعلامات صحيحة:
 
 للموظفين حسب الأقسام:
 <SQL>SELECT d.dept_name, e.first_name, e.last_name, e.salary FROM departments d LEFT JOIN employees e ON d.id = e.department_id ORDER BY d.dept_name, e.first_name</SQL>
@@ -200,24 +400,39 @@ class HRChatService
 للحضور اليوم:
 <SQL>SELECT e.first_name, e.last_name, a.checkInTime, a.status FROM employees e LEFT JOIN attendances a ON e.id = a.employee_id WHERE DATE(a.date) = CURDATE()</SQL>
 
-🎯 **أسلوب الرد المطلوب:**
-- ابدأ بعبارة ودية مثل \"دعني أتحقق من ذلك...\"
+أسلوب الرد المطلوب:
+- اكتب بأسلوب طبيعي وبسيط
+- لا تستخدم أي رموز أو أيقونات أو نجوم
+- ابدأ بعبارة ودية مثل: دعني أتحقق من ذلك
 - كن دقيقاً ومتخصصاً في الموارد البشرية
 - اعرض النتائج بتنسيق جميل ومنظم
 - اشرح المعلومات بطريقة مفيدة ومهنية
 - أضف تعليقات وملاحظات مفيدة حول البيانات
-- لا تذكر أي تفاصيل تقنية للمستخدم";
+- لا تذكر أي تفاصيل تقنية للمستخدم
+- تجنب استخدام أي رموز تماماً في الرد
+
+مثال على رد صحيح:
+دعني أتحقق من عدد الموظفين في النظام.
+<SQL>SELECT COUNT(*) as total FROM employees</SQL>
+
+مثال على رد خاطئ (لا تفعل هذا):
+📊 النتائج: ⭐ 5 موظفين ⭐
+✅ النتيجة: 1000
+
+بدلاً من ذلك، اكتب:
+دعني أتحقق من عدد الموظفين في النظام.
+<SQL>SELECT COUNT(*) as total FROM employees</SQL>";
 
         } catch (\Exception $e) {
             Log::error('Error building system prompt', ['error' => $e->getMessage()]);
-            return "أنت مساعد ذكي متخصص في نظام إدارة الموارد البشرية. استخدم فقط الحقول الموجودة في قاعدة البيانات واعرض النتائج بطريقة مهنية.";
+            return "أنت مساعد ذكي متخصص في نظام إدارة الموارد البشرية. لا تستخدم أي أيقونات أو رموز في ردودك. اكتب بأسلوب طبيعي وبسيط.";
         }
     }
 
     protected function getHRDatabaseSchema()
     {
         return "
-🏢 **employees** (جدول الموظفين - الحقول المتاحة):
+employees (جدول الموظفين - الحقول المتاحة):
 - id: الرقم التعريفي
 - first_name: الاسم الأول  
 - last_name: اسم العائلة
@@ -236,11 +451,11 @@ class HRChatService
 - default_check_in_time: وقت الحضور الافتراضي
 - default_check_out_time: وقت الانصراف الافتراضي
 
-🏛️ **departments** (جدول الأقسام - الحقول المتاحة):
+departments (جدول الأقسام - الحقول المتاحة):
 - id: الرقم التعريفي للقسم
 - dept_name: اسم القسم
 
-⏰ **attendances** (جدول الحضور - الحقول المتاحة):
+attendances (جدول الحضور - الحقول المتاحة):
 - id: الرقم التعريفي
 - employee_id: رقم الموظف (foreign key للربط مع employees)
 - date: تاريخ الحضور
@@ -250,7 +465,7 @@ class HRChatService
 - overtimeDurationInHours: ساعات العمل الإضافية
 - status: حالة الحضور (present, absent, late, etc.)
 
-💰 **payrolls** (جدول كشوف المرتبات - الحقول المتاحة):
+payrolls (جدول كشوف المرتبات - الحقول المتاحة):
 - id: الرقم التعريفي
 - employee_id: رقم الموظف (foreign key للربط مع employees)
 - month: الشهر
@@ -266,7 +481,7 @@ class HRChatService
 - net_salary: صافي الراتب
 - salary_per_hour: الراتب بالساعة
 
-⚠️ **حقول غير موجودة (لا تستخدمها):**
+حقول غير موجودة (لا تستخدمها):
 - position, job_title, role في جدول employees
 - department_name في أي جدول
 - employee_name في أي جدول
@@ -286,14 +501,14 @@ class HRChatService
             });
 
             return "
-📈 **إحصائيات سريعة:**
+إحصائيات سريعة:
 - إجمالي الموظفين: {$stats['total_employees']}
 - عدد الأقسام: {$stats['total_departments']}
 - حضور اليوم: {$stats['today_attendances']}
 - كشوف مرتبات هذا الشهر: {$stats['this_month_payrolls']}
 
-📅 **التاريخ الحالي:** " . now()->format('Y-m-d H:i:s') . "
-🗓️ **الشهر الحالي:** " . now()->format('F Y');
+التاريخ الحالي: " . now()->format('Y-m-d H:i:s') . "
+الشهر الحالي: " . now()->format('F Y');
 
         } catch (\Exception $e) {
             return "Business context temporarily unavailable.";
@@ -338,381 +553,303 @@ class HRChatService
         // إزالة أي SQL code من الاستجابة
         $cleanResponse = preg_replace('/<SQL>.*?<\/SQL>/s', '', $response);
         
-        // إزالة أي ذكر للـ SQL أو الاستعلامات التقنية
+        // إزالة أي أيقونات أو رموز غير مرغوب فيها بشكل شامل
+        $cleanResponse = preg_replace('/[📊📋👤💰⭐✅❌🔍💡👥📈📉🏢⏰➕🏛️💼💵🌍🆔🎂📱📧🏠📅🕐🕕🎯📝📞⚠️🚀🔧]/u', '', $cleanResponse);
+        
+        // إزالة النجوم والرموز الخاصة
+        $cleanResponse = preg_replace('/\*\*(.*?)\*\*/', '$1', $cleanResponse);
+        $cleanResponse = str_replace(['**', '*'], '', $cleanResponse);
+        
+        // إزالة أي نمط من الأيقونات المحتملة
+        $cleanResponse = preg_replace('/[\x{1F300}-\x{1F9FF}]/u', '', $cleanResponse);
+        $cleanResponse = preg_replace('/[\x{2600}-\x{26FF}]/u', '', $cleanResponse);
+        $cleanResponse = preg_replace('/[\x{2700}-\x{27BF}]/u', '', $cleanResponse);
+        
+        // إزالة عبارات مثل "النتائج:" و "تحليل سريع:"
+        $cleanResponse = preg_replace('/النتائج:\s*/u', '', $cleanResponse);
+        $cleanResponse = preg_replace('/تحليل سريع:\s*/u', '', $cleanResponse);
+        $cleanResponse = preg_replace('/النتيجة:\s*/u', '', $cleanResponse);
+        
+        // إزالة أي أكواد SQL متبقية
         $cleanResponse = preg_replace('/```sql.*?```/s', '', $cleanResponse);
         $cleanResponse = preg_replace('/SELECT.*?;/si', '', $cleanResponse);
-        $cleanResponse = preg_replace('/SQL.*?:/i', '', $cleanResponse);
         
-        // تنظيف النص من المسافات الزائدة والنص الزائد المولد من AI
+        // تنظيف النص من المسافات الزائدة
         $cleanResponse = trim(preg_replace('/\s+/', ' ', $cleanResponse));
-        
-        // إزالة أي نص غير مرغوب فيه من الـ AI
-        $cleanResponse = preg_replace('/النتائج المتاحة.*?\|.*?\|/s', '', $cleanResponse);
-        $cleanResponse = preg_replace('/\|.*?\|.*?\|.*?\|/s', '', $cleanResponse);
-        $cleanResponse = preg_replace('/ملاحظات مهمة:.*?هل تريد/s', '', $cleanResponse);
+        $cleanResponse = preg_replace('/\n\s*\n/', '\n', $cleanResponse);
         
         if (isset($queryResult['error'])) {
-            // تحسين رسائل الخطأ لتكون أكثر ودية
-            $errorMsg = $queryResult['error'];
-            if (strpos($errorMsg, 'Unknown column') !== false) {
-                $cleanResponse = "عذراً، حدث خطأ في معالجة طلبك. دعني أعيد المحاولة بطريقة أخرى...";
-                
-                // محاولة تقديم بديل بسيط
-                $fallbackResponse = $this->getFallbackResponseForError($cleanResponse);
-                if ($fallbackResponse) {
-                    return $fallbackResponse;
-                }
-            }
-            
-            return "❌ **عذراً، واجهت صعوبة في جلب هذه البيانات حالياً.** يرجى إعادة صياغة السؤال أو المحاولة مرة أخرى.";
+            return $this->handleQueryError($queryResult['error'], $cleanResponse);
         }
         
         if (isset($queryResult['data'])) {
-            $dataText = $this->formatHRQueryResults($queryResult['data']);
-            $analysis = $this->addHRInsights($queryResult['data'], $cleanResponse);
-            
-            // تنظيف الرد وجعله أكثر بساطة
-            $finalResponse = "📊 **النتائج:**\n" . $dataText . $analysis;
-            
-            return $finalResponse;
+            return $this->formatDataResponse($queryResult['data'], $cleanResponse);
         }
         
-        return $cleanResponse ?: "تم معالجة طلبك بنجاح.";
+        // تنظيف نهائي للرد العام
+        $cleanResponse = $this->finalCleanup($cleanResponse);
+        
+        return ResponseFormatter::formatGeneralResponse($cleanResponse ?: "تم معالجة طلبك بنجاح");
     }
 
-    protected function getFallbackResponseForError($originalMessage)
+    protected function finalCleanup($text)
     {
-        // محاولة تقديم بديل عند حدوث خطأ في SQL
-        if (strpos($originalMessage, 'موظفين') !== false && strpos($originalMessage, 'قسم') !== false) {
-            try {
-                $departments = Department::withCount('employees')->get();
-                $response = "🏛️ **الموظفين حسب الأقسام:**\n\n";
-                foreach ($departments as $dept) {
-                    $employees = Employee::where('department_id', $dept->id)->get();
-                    $response .= "📋 **قسم {$dept->dept_name}:** ({$dept->employees_count} موظف)\n";
-                    foreach ($employees as $emp) {
-                        $response .= "   • {$emp->first_name} {$emp->last_name} - راتب: " . number_format($emp->salary, 0) . " جنيه\n";
-                    }
-                    $response .= "\n";
-                }
-                return $response;
-            } catch (\Exception $e) {
-                return null;
-            }
-        }
-        return null;
+        // تنظيف نهائي شامل
+        $text = preg_replace('/[📊📋👤💰⭐✅❌🔍💡👥📈📉🏢⏰➕🏛️💼💵🌍🆔🎂📱📧🏠📅🕐🕕🎯📝📞⚠️🚀🔧]/u', '', $text);
+        
+        // إزالة أي رموز unicode للأيقونات
+        $text = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $text);
+        $text = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $text);
+        
+        // إزالة النجوم وعلامات التنسيق
+        $text = preg_replace('/\*\*(.*?)\*\*/', '$1', $text);
+        $text = str_replace(['**', '*', '⭐', '✅', '❌', '📊'], '', $text);
+        
+        // تنظيف المسافات
+        $text = trim(preg_replace('/\s+/', ' ', $text));
+        
+        return $text;
     }
 
-    protected function formatHRQueryResults($data)
+    protected function formatDataResponse($data, $context)
     {
         if (empty($data)) {
-            return "❌ **لا توجد نتائج.**";
+            return "<div class='info-message'>لا توجد نتائج متطابقة مع طلبك</div>";
         }
         
-        if (count($data) === 1 && count((array)$data[0]) === 1) {
-            // نتيجة واحدة (مثل عدد أو مجموع)
-            $value = array_values((array)$data[0])[0];
-            return "✅ **النتيجة:** " . number_format($value, 0) . "\n";
+        // تحديد نوع البيانات والتنسيق المناسب
+        $firstRow = (array)$data[0];
+        
+        // عدد الموظفين
+        if (count($data) === 1 && isset($firstRow['total'])) {
+            return ResponseFormatter::formatEmployeeCount($firstRow['total']);
         }
         
-        // نتائج متعددة - تنسيق بطريقة منظمة للـ React
-        $result = "";
-        $headers = array_keys((array)$data[0]);
-        $arabicHeaders = $this->translateHeaders($headers);
-        
-        // إضافة ملخص سريع
-        $totalResults = count($data);
-        $result .= "🔍 **عدد النتائج:** {$totalResults}\n\n";
-        
-        // عرض النتائج بتنسيق بطاقات منظم
-        foreach (array_slice($data, 0, 10) as $index => $row) {
-            $rowData = (array)$row;
-            $result .= "📋 **" . ($index + 1) . ".**\n";
-            
-            // ترتيب الحقول حسب الأهمية
-            $orderedFields = $this->getOrderedFields($rowData);
-            
-            foreach ($orderedFields as $key => $value) {
-                $arabicKey = $arabicHeaders[$key] ?? $key;
-                $displayValue = $this->formatFieldValue($key, $value);
-                
-                // استخدام أيقونات مناسبة
-                $icon = $this->getFieldIcon($key);
-                $result .= "   {$icon} **{$arabicKey}:** {$displayValue}\n";
-            }
-            $result .= "\n";
+        // إذا كانت النتيجة رقم واحد فقط
+        if (count($data) === 1 && count($firstRow) === 1) {
+            $value = array_values($firstRow)[0];
+            $label = $this->getContextLabel($context);
+            return "<div class='result-card'>" .
+                   "<h3>{$label}</h3>" .
+                   "<div class='main-number'>" . number_format($value) . "</div>" .
+                   "</div>";
         }
         
-        if (count($data) > 10) {
-            $remaining = count($data) - 10;
-            $result .= "📝 *يوجد {$remaining} نتيجة إضافية. يمكنك طلب المزيد إذا كنت تحتاج.*\n";
+        // قائمة الموظفين
+        if (isset($firstRow['first_name']) || isset($firstRow['last_name'])) {
+            return $this->formatEmployeeResults($data);
         }
         
-        return $result;
+        // بيانات الحضور
+        if (isset($firstRow['status']) || isset($firstRow['checkInTime'])) {
+            return $this->formatAttendanceResults($data);
+        }
+        
+        // بيانات الرواتب
+        if (isset($firstRow['salary']) || isset($firstRow['net_salary'])) {
+            return $this->formatSalaryResults($data);
+        }
+        
+        // بيانات الأقسام
+        if (isset($firstRow['dept_name'])) {
+            return $this->formatDepartmentResults($data);
+        }
+        
+        // تنسيق عام للبيانات
+        return $this->formatGenericResults($data);
     }
 
-    protected function getOrderedFields($rowData)
+    protected function formatEmployeeResults($employees)
     {
-        // ترتيب الحقول حسب الأهمية
-        $orderedKeys = [
-            'first_name', 'last_name', 'dept_name', 'email', 'phone', 
-            'salary', 'hire_date', 'working_hours_per_day', 'salary_per_hour',
-            'address', 'gender', 'nationality', 'birthdate',
-            'checkInTime', 'checkOutTime', 'status', 'date',
-            'lateDurationInHours', 'overtimeDurationInHours',
-            'net_salary', 'total_overtime', 'total_deduction'
+        // تحويل إلى مجموعة من الكائنات
+        $employeeObjects = collect($employees)->map(function($emp) {
+            $empArray = (array)$emp;
+            return (object)[
+                'id' => $empArray['id'] ?? 0,
+                'first_name' => $empArray['first_name'] ?? 'غير محدد',
+                'last_name' => $empArray['last_name'] ?? '',
+                'salary' => $empArray['salary'] ?? 0,
+                'department' => (object)['dept_name' => $empArray['dept_name'] ?? 'غير محدد']
+            ];
+        });
+        
+        return ResponseFormatter::formatEmployeeList($employeeObjects);
+    }
+
+    protected function formatAttendanceResults($attendanceData)
+    {
+        // تحليل بيانات الحضور
+        $stats = [
+            'total' => count($attendanceData),
+            'present' => 0,
+            'late' => 0,
+            'absent' => 0
         ];
         
-        $ordered = [];
-        
-        // إضافة الحقول المرتبة أولاً
-        foreach ($orderedKeys as $key) {
-            if (array_key_exists($key, $rowData)) {
-                $ordered[$key] = $rowData[$key];
+        foreach ($attendanceData as $record) {
+            $record = (array)$record;
+            $status = $record['status'] ?? 'unknown';
+            
+            switch ($status) {
+                case 'present':
+                    $stats['present']++;
+                    break;
+                case 'late':
+                    $stats['late']++;
+                    break;
+                case 'absent':
+                    $stats['absent']++;
+                    break;
             }
         }
         
-        // إضافة أي حقول متبقية
-        foreach ($rowData as $key => $value) {
-            if (!array_key_exists($key, $ordered)) {
-                $ordered[$key] = $value;
-            }
-        }
-        
-        return $ordered;
+        return ResponseFormatter::formatAttendanceToday($stats);
     }
 
-    protected function formatFieldValue($key, $value)
+    protected function formatSalaryResults($salaryData)
     {
-        if ($value === null || $value === '') {
-            return '`غير محدد`';
+        // تحضير بيانات الرواتب للتحليل
+        $salaries = [];
+        foreach ($salaryData as $record) {
+            $record = (array)$record;
+            $salary = $record['salary'] ?? $record['net_salary'] ?? 0;
+            if ($salary > 0) {
+                $salaries[] = ['salary' => $salary];
+            }
         }
         
-        // تنسيق خاص للحقول المختلفة
+        return ResponseFormatter::formatSalaryInfo($salaries);
+    }
+
+    protected function formatDepartmentResults($departmentData)
+    {
+        // تحضير بيانات الأقسام
+        $departments = [];
+        foreach ($departmentData as $record) {
+            $record = (array)$record;
+            $departments[] = [
+                'name' => $record['dept_name'] ?? 'غير محدد',
+                'employee_count' => $record['count'] ?? $record['employee_count'] ?? 0
+            ];
+        }
+        
+        return ResponseFormatter::formatDepartmentStats($departments);
+    }
+
+    protected function formatGenericResults($data)
+    {
+        $response = "<div class='results-container'>";
+        $response .= "<div class='results-header'>";
+        $response .= "<h3>نتائج البحث</h3>";
+        $response .= "<span class='count-badge'>" . count($data) . " نتيجة</span>";
+        $response .= "</div>";
+        
+        foreach (array_slice($data, 0, 5) as $index => $row) {
+            $row = (array)$row;
+            $response .= "<div class='employee-card'>";
+            $response .= "<div class='employee-header'>";
+            $response .= "<span class='employee-name'>النتيجة " . ($index + 1) . "</span>";
+            $response .= "</div>";
+            $response .= "<div class='employee-details'>";
+            
+            $count = 0;
+            foreach ($row as $key => $value) {
+                if ($count >= 4) break; // عرض أول 4 حقول فقط
+                
+                $label = $this->translateFieldName($key);
+                $formattedValue = $this->formatValue($key, $value);
+                
+                $response .= "<div class='detail-item'>";
+                $response .= "<span class='label'>{$label}</span>";
+                $response .= "<span class='value'>{$formattedValue}</span>";
+                $response .= "</div>";
+                $count++;
+            }
+            
+            $response .= "</div>";
+            $response .= "</div>";
+        }
+        
+        if (count($data) > 5) {
+            $remaining = count($data) - 5;
+            $response .= "<div class='info-message'>يوجد {$remaining} نتيجة إضافية</div>";
+        }
+        
+        $response .= "</div>";
+        return $response;
+    }
+
+    protected function getContextLabel($context)
+    {
+        if (stripos($context, 'موظف') !== false) return 'عدد الموظفين';
+        if (stripos($context, 'راتب') !== false) return 'متوسط الراتب';
+        if (stripos($context, 'حضور') !== false) return 'إجمالي الحضور';
+        if (stripos($context, 'قسم') !== false) return 'عدد الأقسام';
+        
+        return 'النتيجة';
+    }
+
+    protected function translateFieldName($field)
+    {
+        $translations = [
+            'id' => 'الرقم',
+            'first_name' => 'الاسم الأول',
+            'last_name' => 'اسم العائلة',
+            'email' => 'البريد الإلكتروني',
+            'phone' => 'الهاتف',
+            'salary' => 'الراتب',
+            'dept_name' => 'القسم',
+            'hire_date' => 'تاريخ التوظيف',
+            'status' => 'الحالة',
+            'checkInTime' => 'وقت الحضور',
+            'checkOutTime' => 'وقت الانصراف',
+            'total' => 'الإجمالي',
+            'count' => 'العدد'
+        ];
+        
+        return $translations[$field] ?? $field;
+    }
+
+    protected function formatValue($key, $value)
+    {
+        if ($value === null || $value === '') {
+            return 'غير محدد';
+        }
+        
         switch ($key) {
             case 'salary':
             case 'net_salary':
-            case 'salary_per_hour':
-                return number_format($value, 0) . ' جنيه';
+                return number_format($value) . ' جنيه';
                 
             case 'hire_date':
-            case 'birthdate':
             case 'date':
+            case 'birthdate':
                 return date('d/m/Y', strtotime($value));
                 
             case 'checkInTime':
             case 'checkOutTime':
                 return date('H:i', strtotime($value));
                 
-            case 'lateDurationInHours':
-            case 'overtimeDurationInHours':
-            case 'working_hours_per_day':
-                return $value . ' ساعة';
-                
             case 'status':
                 $statusMap = [
-                    'present' => '✅ حاضر',
-                    'absent' => '❌ غائب',
-                    'late' => '⏰ متأخر',
-                    'early_leave' => '🚪 انصراف مبكر'
+                    'present' => 'حاضر',
+                    'absent' => 'غائب',
+                    'late' => 'متأخر'
                 ];
                 return $statusMap[$value] ?? $value;
-                
-            case 'gender':
-                $genderMap = [
-                    'male' => '👨 ذكر',
-                    'female' => '👩 أنثى'
-                ];
-                return $genderMap[$value] ?? $value;
-                
-            case 'email':
-                return "`{$value}`";
                 
             default:
                 return $value;
         }
     }
 
-    protected function getFieldIcon($key)
+    protected function handleQueryError($error, $context)
     {
-        $icons = [
-            'first_name' => '👤',
-            'last_name' => '👤',
-            'dept_name' => '🏢',
-            'email' => '📧',
-            'phone' => '📱',
-            'salary' => '💰',
-            'hire_date' => '📅',
-            'working_hours_per_day' => '⏱️',
-            'address' => '🏠',
-            'birthdate' => '🎂',
-            'checkInTime' => '🕐',
-            'checkOutTime' => '🕕',
-            'status' => '📊',
-            'lateDurationInHours' => '⏰',
-            'overtimeDurationInHours' => '➕',
-            'net_salary' => '💵',
-            'nationality' => '🌍',
-            'national_id' => '🆔'
-        ];
-        
-        return $icons[$key] ?? '•';
-    }
-
-    protected function translateHeaders($headers)
-    {
-        $translations = [
-            'id' => 'الرقم التعريفي',
-            'first_name' => 'الاسم الأول',
-            'last_name' => 'اسم العائلة',
-            'full_name' => 'الاسم الكامل',
-            'email' => 'البريد الإلكتروني',
-            'phone' => 'رقم الهاتف',
-            'address' => 'العنوان',
-            'salary' => 'الراتب',
-            'hire_date' => 'تاريخ التوظيف',
-            'department_id' => 'رقم القسم',
-            'dept_name' => 'اسم القسم',
-            'working_hours_per_day' => 'ساعات العمل اليومية',
-            'salary_per_hour' => 'الراتب بالساعة',
-            'gender' => 'الجنس',
-            'nationality' => 'الجنسية',
-            'national_id' => 'رقم الهوية',
-            'birthdate' => 'تاريخ الميلاد',
-            'date' => 'التاريخ',
-            'checkInTime' => 'وقت الحضور',
-            'checkOutTime' => 'وقت الانصراف',
-            'lateDurationInHours' => 'ساعات التأخير',
-            'overtimeDurationInHours' => 'ساعات إضافية',
-            'status' => 'الحالة',
-            'month' => 'الشهر',
-            'month_days' => 'أيام الشهر',
-            'attended_days' => 'أيام الحضور',
-            'absent_days' => 'أيام الغياب',
-            'total_overtime' => 'إجمالي الساعات الإضافية',
-            'total_deduction' => 'إجمالي الخصومات',
-            'net_salary' => 'صافي الراتب',
-            'count' => 'العدد',
-            'total' => 'الإجمالي',
-            'average' => 'المتوسط',
-            'max' => 'الأعلى',
-            'min' => 'الأقل'
-        ];
-        
-        $result = [];
-        foreach ($headers as $header) {
-            $result[$header] = $translations[$header] ?? $header;
+        if (strpos($error, 'Unknown column') !== false) {
+            return "<div class='info-message'>عذراً، حدث خطأ في معالجة طلبك. يرجى إعادة صياغة السؤال بطريقة أخرى.</div>";
         }
         
-        return $result;
-    }
-
-    protected function addHRInsights($data, $context)
-    {
-        if (empty($data)) {
-            return "";
-        }
-        
-        $insights = "\n💡 **تحليل سريع:**\n";
-        
-        // تحليل بناءً على نوع البيانات
-        if (strpos($context, 'موظف') !== false || strpos($context, 'قسم') !== false) {
-            $employeeCount = 0;
-            $departments = [];
-            $totalSalary = 0;
-            $salaryCount = 0;
-            
-            foreach ($data as $row) {
-                $row = (array)$row;
-                
-                if (!empty($row['first_name'])) {
-                    $employeeCount++;
-                }
-                
-                if (!empty($row['dept_name']) && !in_array($row['dept_name'], $departments)) {
-                    $departments[] = $row['dept_name'];
-                }
-                
-                if (isset($row['salary']) && is_numeric($row['salary']) && $row['salary'] > 0) {
-                    $totalSalary += $row['salary'];
-                    $salaryCount++;
-                }
-            }
-            
-            if ($employeeCount > 0) {
-                $insights .= "👥 **إجمالي الموظفين:** {$employeeCount}\n";
-            }
-            
-            if (!empty($departments)) {
-                $insights .= "🏢 **الأقسام:** " . implode(', ', $departments) . "\n";
-            }
-            
-            if ($salaryCount > 0) {
-                $avgSalary = $totalSalary / $salaryCount;
-                $insights .= "💰 **متوسط الراتب:** " . number_format($avgSalary, 0) . " جنيه\n";
-            }
-        }
-        
-        // تحليل بيانات الحضور
-        if (strpos($context, 'حضور') !== false || isset($data[0]->status)) {
-            $presentCount = 0;
-            $lateCount = 0;
-            $totalCount = 0;
-            
-            foreach ($data as $row) {
-                $row = (array)$row;
-                if (isset($row['status'])) {
-                    $totalCount++;
-                    if ($row['status'] === 'present') $presentCount++;
-                    if ($row['status'] === 'late') $lateCount++;
-                }
-            }
-            
-            if ($totalCount > 0) {
-                $presentPercentage = round(($presentCount / $totalCount) * 100, 1);
-                $insights .= "✅ **نسبة الحضور:** {$presentPercentage}%\n";
-                
-                if ($lateCount > 0) {
-                    $insights .= "⏰ **عدد المتأخرين:** {$lateCount}\n";
-                }
-            }
-        }
-        
-        // تحليل بيانات الرواتب
-        if (strpos($context, 'راتب') !== false || isset($data[0]->net_salary)) {
-            $salaries = [];
-            $totalDeductions = 0;
-            $totalOvertime = 0;
-            
-            foreach ($data as $row) {
-                $row = (array)$row;
-                
-                if (isset($row['net_salary']) && is_numeric($row['net_salary'])) {
-                    $salaries[] = $row['net_salary'];
-                }
-                
-                if (isset($row['total_deduction']) && is_numeric($row['total_deduction'])) {
-                    $totalDeductions += $row['total_deduction'];
-                }
-                
-                if (isset($row['total_overtime']) && is_numeric($row['total_overtime'])) {
-                    $totalOvertime += $row['total_overtime'];
-                }
-            }
-            
-            if (!empty($salaries)) {
-                $maxSalary = max($salaries);
-                $minSalary = min($salaries);
-                $insights .= "📈 **أعلى راتب:** " . number_format($maxSalary, 0) . " جنيه\n";
-                $insights .= "📉 **أقل راتب:** " . number_format($minSalary, 0) . " جنيه\n";
-            }
-            
-            if ($totalOvertime > 0) {
-                $insights .= "➕ **إجمالي الساعات الإضافية:** {$totalOvertime} ساعة\n";
-            }
-        }
-        
-        return $insights;
+        return "<div class='info-message'>لا أستطيع العثور على البيانات المطلوبة حالياً. يرجى المحاولة مرة أخرى.</div>";
     }
 
     protected function getFallbackResponse($message)
@@ -723,51 +860,68 @@ class HRChatService
         if (strpos($message, 'عدد الموظفين') !== false || strpos($message, 'كم موظف') !== false) {
             try {
                 $count = Employee::count();
-                return "📊 **إجمالي عدد الموظفين:** {$count} موظف";
+                return ResponseFormatter::formatEmployeeCount($count);
             } catch (\Exception $e) {
-                return "عذراً، لا أستطيع الوصول لبيانات الموظفين حالياً.";
+                return "<div class='info-message'>عذراً، لا أستطيع الوصول لبيانات الموظفين حالياً</div>";
             }
         }
         
         if (strpos($message, 'الأقسام') !== false || strpos($message, 'قسم') !== false) {
             try {
                 $departments = Department::withCount('employees')->get();
-                $response = "🏛️ **الأقسام والموظفين:**\n\n";
+                $deptData = [];
                 foreach ($departments as $dept) {
-                    $response .= "📋 **قسم {$dept->dept_name}:** {$dept->employees_count} موظف\n";
+                    $deptData[] = [
+                        'name' => $dept->dept_name,
+                        'employee_count' => $dept->employees_count
+                    ];
                 }
-                return $response;
+                return ResponseFormatter::formatDepartmentStats($deptData);
             } catch (\Exception $e) {
-                return "عذراً، لا أستطيع الوصول لبيانات الأقسام حالياً.";
+                return "<div class='info-message'>عذراً، لا أستطيع الوصول لبيانات الأقسام حالياً</div>";
             }
         }
         
         if (strpos($message, 'راتب') !== false || strpos($message, 'متوسط') !== false) {
             try {
-                $avgSalary = Employee::avg('salary');
-                return "💰 **متوسط الراتب:** " . number_format($avgSalary, 2) . " جنيه";
+                $salaries = Employee::whereNotNull('salary')->where('salary', '>', 0)->pluck('salary')->toArray();
+                if (!empty($salaries)) {
+                    $salaryData = array_map(function($salary) {
+                        return ['salary' => $salary];
+                    }, $salaries);
+                    return ResponseFormatter::formatSalaryInfo($salaryData);
+                }
+                return "<div class='info-message'>لا توجد بيانات رواتب متاحة</div>";
             } catch (\Exception $e) {
-                return "عذراً، لا أستطيع حساب متوسط الراتب حالياً.";
+                return "<div class='info-message'>عذراً، لا أستطيع حساب متوسط الراتب حالياً</div>";
             }
         }
         
         if (strpos($message, 'حضور') !== false || strpos($message, 'اليوم') !== false) {
             try {
-                $todayAttendance = Attendence::whereDate('date', today())->count();
-                $totalEmployees = Employee::count();
-                $percentage = $totalEmployees > 0 ? round(($todayAttendance / $totalEmployees) * 100, 1) : 0;
-                return "⏰ **حضور اليوم:** {$todayAttendance} من أصل {$totalEmployees} موظف ({$percentage}%)";
+                $attendanceStats = [
+                    'total' => Attendence::whereDate('date', today())->count(),
+                    'present' => Attendence::whereDate('date', today())->where('status', 'present')->count(),
+                    'late' => Attendence::whereDate('date', today())->where('status', 'late')->count(),
+                    'absent' => Attendence::whereDate('date', today())->where('status', 'absent')->count(),
+                ];
+                return ResponseFormatter::formatAttendanceToday($attendanceStats);
             } catch (\Exception $e) {
-                return "عذراً، لا أستطيع جلب بيانات الحضور حالياً.";
+                return "<div class='info-message'>عذراً، لا أستطيع جلب بيانات الحضور حالياً</div>";
             }
         }
         
-        return "🤖 أهلاً بك! يمكنني مساعدتك في:\n\n" .
-               "📊 **معلومات الموظفين:** عدد الموظفين، الأقسام، الرواتب\n" .
-               "⏰ **بيانات الحضور:** الحضور اليومي، التأخير، الساعات الإضافية\n" .
-               "💰 **كشوف المرتبات:** الرواتب، الخصومات، المكافآت\n" .
-               "📈 **التقارير والإحصائيات:** تحليلات مختلفة\n\n" .
-               "مثال: اكتب \"كم عدد الموظفين؟\" أو \"اعرض الأقسام\"";
+        return "<div class='general-response'>" .
+               "<h3>مرحباً بك في نظام إدارة الموارد البشرية</h3>" .
+               "<p>يمكنني مساعدتك في:</p>" .
+               "<div style='margin: 15px 0;'>" .
+               "<strong>معلومات الموظفين:</strong> عدد الموظفين، الأقسام، الرواتب<br>" .
+               "<strong>بيانات الحضور:</strong> الحضور اليومي، التأخير، الساعات الإضافية<br>" .
+               "<strong>كشوف المرتبات:</strong> الرواتب، الخصومات، المكافآت<br>" .
+               "<strong>التقارير والإحصائيات:</strong> تحليلات مختلفة" .
+               "</div>" .
+               "<p><strong>مثال:</strong> اكتب \"كم عدد الموظفين؟\" أو \"اعرض الأقسام\"</p>" .
+               "</div>";
     }
 
     public function getQuickStats()
