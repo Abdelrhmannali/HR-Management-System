@@ -8,8 +8,50 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  min-width: 320px; /* تم تقليل min-width لدعم الشاشات الصغيرة */
+  min-width: 320px; 
 }
+
+.hrsb-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-direction: row;
+}
+
+
+.hrsb-logo {
+  width: clamp(35px, 5vw, 48px);
+  height: clamp(35px, 5vw, 48px);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+.hrsb-brand {
+  font-weight: bold;
+  font-family: 'Inter', sans-serif;
+  color: #ac70c6;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+
+@media (max-width: 480px) {
+  .hrsb-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hrsb-brand {
+    white-space: normal; 
+    text-align: left;
+  }
+}
+
+
+
 
 .hrsb-sidebar {
   width: clamp(200px, 20vw, 250px);
@@ -165,10 +207,10 @@
   overflow-y: auto;
 }
 
-/* Responsive Styling */
+
 @media (max-width: 1024px) {
   .hrsb-wrapper {
-    min-width: 0; /* إزالة الحد الأدنى للعرض لدعم الشاشات المتوسطة */
+    min-width: 0; 
   }
 
   .hrsb-sidebar {
@@ -179,7 +221,7 @@
     transform: translateX(-100%);
     max-height: 100vh;
     min-height: 0;
-    overflow-y: auto; /* يسمح بالتمرير الرأسي دائماً */
+    overflow-y: auto;
   }
 
   .hrsb-sidebar.hrsb-sidebar-open {
