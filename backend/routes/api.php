@@ -65,4 +65,27 @@ Route::get('/all-months', [PayrollController::class, 'getAllMonths']);
     });
     Route::get('/payroll/verify/{employee_id}/{month}', [PayrollController::class, 'verifyPayrollApi']);
 
+
+    // أضف هذا داخل الـ protected routes في api.php
+// بعد السطر: Route::middleware('auth:sanctum')->group(function () {
+
+    // // AI Chat Routes
+    // Route::prefix('ai-chat')->group(function () {
+    //     Route::post('/message', [App\Http\Controllers\Api\AIChatController::class, 'chat']);
+    //     Route::get('/stats', [App\Http\Controllers\Api\AIChatController::class, 'getStats']);
+    //     Route::get('/suggestions', [App\Http\Controllers\Api\AIChatController::class, 'getSuggestions']);
+    //     Route::post('/clear-cache', [App\Http\Controllers\Api\AIChatController::class, 'clearCache']);
+    //     Route::get('/health', [App\Http\Controllers\Api\AIChatController::class, 'healthCheck']);
+    // });
+
+    // AI Chat Routes
+Route::prefix('ai-chat')->group(function () {
+    Route::post('/message', [App\Http\Controllers\Api\AIChatController::class, 'chat']);
+    Route::get('/test-connection', [App\Http\Controllers\Api\AIChatController::class, 'testConnection']);
+    Route::get('/stats', [App\Http\Controllers\Api\AIChatController::class, 'getStats']);
+    Route::get('/suggestions', [App\Http\Controllers\Api\AIChatController::class, 'getSuggestions']);
+    Route::post('/clear-cache', [App\Http\Controllers\Api\AIChatController::class, 'clearCache']);
+    Route::get('/health', [App\Http\Controllers\Api\AIChatController::class, 'healthCheck']);
+    Route::get('/system-info', [App\Http\Controllers\Api\AIChatController::class, 'getSystemInfo']);
+});
 });
