@@ -28,7 +28,12 @@ A modern web-based HR management system built to streamline employee, attendance
 
 
 
-
+# Technologies Used
+Frontend	Backend	Database
+React.js	Laravel	MySQL / PostgreSQL
+Axios	Laravel Sanctum	 
+Bootstrap / Custom CSS	API-based Auth	 
+ 
 
 
 
