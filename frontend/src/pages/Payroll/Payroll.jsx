@@ -63,7 +63,7 @@ export default function PayrollTable() {
     }
   }, [fetchData, currentMonth]);
 
-  // جلب بيانات الموظفين (id, first_name, last_name, profile_picture)
+
   useEffect(() => {
     api
       .get("/employees?fields=id,first_name,last_name,profile_picture")
